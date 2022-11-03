@@ -165,8 +165,15 @@ class Attention(nn.Module):
         else:
             _, N, C = x.shape
         qkv = self.qkv(x)
-        qkv = qkv.reshape((-1, N, 3, self.num_heads, C // self.num_heads)).permute(2, 0, 3, 1, 4)
-        q, k, v = qkv[0] * self.scale, qkv[1], qkv[2]
+
+        # 5d to 4d
+        # qkv = qkv.reshape((-1, N, 3, self.num_heads, C // self.num_heads)).permute(2, 0, 3, 1, 4)
+        # q, k, v = qkv[0] * self.scale, qkv[1], qkv[2]
+        qkv_4d = qkv.reshape((-1, N, 3, C)).permute(2, 0, 3, 1)
+        q_4d, k_4d, v_4d = qkv_4d[0] * self.scale, qkv_4d[1], qkv_4d[2]
+        q = q_4d.reshape(-1, self.num_heads, C // self.num_heads, N).permute(0, 1, 3, 2)
+        k = k_4d.reshape(-1, self.num_heads, C // self.num_heads, N).permute(0, 1, 3, 2)
+        v = v_4d.reshape(-1, self.num_heads, C // self.num_heads, N).permute(0, 1, 3, 2)
 
         attn = (q.matmul(k.permute(0, 1, 3, 2)))
         if self.mixer == 'Local':

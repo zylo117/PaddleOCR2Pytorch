@@ -107,3 +107,11 @@ if __name__ == '__main__':
     converter.save_pytorch_weights(save_name)
 
     print('done.')
+
+    torch.onnx.export(converter.net, inp, 'en_ppocrv3.onnx',
+                      verbose=True, opset_version=15,
+                      do_constant_folding=True)
+    os.system(f'python3 -m onnxsim en_ppocrv3.onnx en_ppocrv3.onnx')
+
+    mod = torch.jit.trace(converter.net, inp)
+    torch.jit.save(mod, "en_ppocrv3.pt")

@@ -201,7 +201,8 @@ class MobileNetV1Enhance(nn.Module):
         return y
 
 def hardsigmoid(x):
-    return F.relu6(x + 3., inplace=True) / 6.
+    # return F.relu6(x + 3., inplace=True) / 6.
+    return F.hardsigmoid(x, True)
 
 class SEModule(nn.Module):
     def __init__(self, channel, reduction=4):

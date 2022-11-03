@@ -106,3 +106,11 @@ if __name__ == '__main__':
     save_name = 'ch_ptocr_v3_rec_infer.pth'
     converter.save_pytorch_weights(save_name)
     print('done.')
+
+    torch.onnx.export(converter.net, inp, 'ch_ppocrv3.onnx',
+                      verbose=True, opset_version=15,
+                      do_constant_folding=True)
+    os.system(f'python3 -m onnxsim ch_ppocrv3.onnx ch_ppocrv3.onnx')
+
+    mod = torch.jit.trace(converter.net, inp)
+    torch.jit.save(mod, "ch_ppocrv3.pt")
